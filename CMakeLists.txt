@@ -3,6 +3,7 @@ project(ConcurrentDataStructure)
 enable_testing()
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 include_directories (${Boost_INCLUDE_DIRS})
+find_package(Threads REQUIRED)
 file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
 foreach(TEST_SRC ${TEST_SRCS})
         #Extract the filename without an extension (NAME_WE)
@@ -14,7 +15,7 @@ foreach(TEST_SRC ${TEST_SRCS})
         #link to Boost libraries AND your targets and dependencies
         #target_link_libraries(${testName} ${Boost_LIBRARIES} [YOUR TARGETS/LIBRARIES])
         target_link_libraries(${testName} ${Boost_LIBRARIES})
-
+        target_link_libraries(${testName} Threads::Threads)
         #I like to move testing binaries into a testBin directory
         set_target_properties(${testName} PROPERTIES 
             RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/testBin)
@@ -27,6 +28,6 @@ foreach(TEST_SRC ${TEST_SRCS})
         )
 endforeach()
 add_custom_target(unittests ${CMAKE_COMMAND} -E env CTEST_OUTPUT_ON_FAILURE=1
-                  ${CMAKE_CTEST_COMMAND}
-                  DEPENDS ${testNames}
-                  WORKING_DIRECTORY ${CMAKE_BINAEY_DIR})
+    ${CMAKE_CTEST_COMMAND}
+    DEPENDS ${testNames}
+    WORKING_DIRECTORY ${CMAKE_BINAEY_DIR})

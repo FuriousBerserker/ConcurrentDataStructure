@@ -4,8 +4,42 @@
 #include <cinttypes>
 #include <cstddef>
 #include <atomic>
-#define USE_PTHREAD_MUTEX 0
-#define USE_PIN_MUTEX 0
+#include <iostream>
+#define __USE_GNU_CAS 1
+#define __USE_PIN_CAS 0
+
+#ifdef __USE_GNU_CAS
+#elif __USE_PIN_CAS
+#include "atomic/ops.hpp"
+#endif
+
+/**
+ * A wrapper for different CAS implemention, which only support integral scalar or pointer types that are 1, 2, 4 or 8 bytes in length
+ */
+template <typename V>
+inline V compare_and_swap(V* location, V oldVal, V newVal) {
+#ifdef __USE_GNU_CAS
+    return __sync_val_compare_and_swap(location, oldVal, newVal); 
+#elif __USE_PIN_CAS
+    return ATOMIC::OPS::CompareAndSwap(location, oldVal, newVal);
+#else
+    if (*location == oldVal) {
+        *location = newVal; 
+    } else {
+        oldVal = *location;
+    }
+    return oldVal;
+#endif
+}
+
+/**
+ * A wrapper for memory barrier implementation
+ */
+void memory_barrier() {
+#ifdef __USE_GNU_CAS
+#elif __USE_PIN_CAS
+#endif
+}
 
 /**
  * DefaultHash use variable's address as its hash 
@@ -84,25 +118,35 @@ public:
         return get(key) != NV ? true : false; 
     }
     
+    /**
+     * Use lightweight compare_and_swap ops to synchronize with other concurrent read / write
+     */
     void put(const Key &key, const Value &value) {
         uint64_t hash = Hash::hash(key) % bucketNum;
-        Element* head = buckets[hash];
-        while (head) {
-            if (head->key == key) {
-                break;
-            }
-            head = head->next;
-        }
-        if (head) {
-            head->value = value;
-        } else {
-            head = buckets[hash];
-            Element* newHead = new Element(key, value, head);
-            buckets[hash] = newHead;
-            size++;
-        }
+        Element* newHead = new Element(key, value, nullptr);
+        bool success;
+        do {
+            Element* oldHead = buckets[hash];
+            newHead->next = oldHead;
+            success = compare_and_swap((uintptr_t*)&buckets[hash], (uintptr_t)oldHead, (uintptr_t)newHead) == (uintptr_t)oldHead;
+        } while (!success);
     }
-    
+  
+    ///**
+     //* Attempt to insert the key if absent
+     //*/
+    //bool tryPut(const Key &key, const Value &value) {
+        //uint64_t hash = Hash::hash(key) % bucketNum;
+        //Element* head = buckets[hash];
+        //bool success = false;
+        //while (head) {
+            //if (head->key == key) {
+                //break;
+            //}
+            //head = head->next;
+        //}
+    //}
+
     uint64_t getSize() {
         return size;
     }
