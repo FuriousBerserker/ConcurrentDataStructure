@@ -5,8 +5,6 @@
 #include <cstddef>
 #include <atomic>
 #include <iostream>
-#define __USE_GNU_CAS 1
-#define __USE_PIN_CAS 0
 
 #ifdef __USE_GNU_CAS
 #elif __USE_PIN_CAS

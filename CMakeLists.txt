@@ -19,7 +19,7 @@ foreach(TEST_SRC ${TEST_SRCS})
         #I like to move testing binaries into a testBin directory
         set_target_properties(${testName} PROPERTIES 
             RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR}/testBin)
-
+        target_compile_options(${testName} PRIVATE "-D __USE_GNU_CAS")
         #Finally add it to test execution - 
         #Notice the WORKING_DIRECTORY and COMMAND
         add_test(NAME ${testName} 
