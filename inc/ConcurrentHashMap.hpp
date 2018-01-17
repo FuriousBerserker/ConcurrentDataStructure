@@ -1,6 +1,7 @@
 #ifndef __CONCURRENT_HASH_MAP_H__
 #define __CONCURRENT_HASH_MAP_H__
 
+#define _GNU_SOURCE
 #include <cinttypes>
 #include <cstddef>
 #include <atomic>
