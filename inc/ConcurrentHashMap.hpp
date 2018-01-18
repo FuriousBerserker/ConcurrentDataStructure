@@ -1,14 +1,14 @@
 #ifndef __CONCURRENT_HASH_MAP_H__
 #define __CONCURRENT_HASH_MAP_H__
 
-#define _GNU_SOURCE
 #include <cinttypes>
 #include <cstddef>
-#include <atomic>
-#include <iostream>
 
 #ifdef __USE_GNU_CAS
-#elif __USE_PIN_CAS
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#elif defined __USE_PIN_CAS
 #include "atomic/ops.hpp"
 #endif
 
@@ -19,7 +19,7 @@ template <typename V>
 inline V compare_and_swap(V* location, V oldVal, V newVal) {
 #ifdef __USE_GNU_CAS
     return __sync_val_compare_and_swap(location, oldVal, newVal); 
-#elif __USE_PIN_CAS
+#elif defined __USE_PIN_CAS
     return ATOMIC::OPS::CompareAndSwap(location, oldVal, newVal);
 #else
     if (*location == oldVal) {
@@ -28,15 +28,6 @@ inline V compare_and_swap(V* location, V oldVal, V newVal) {
         oldVal = *location;
     }
     return oldVal;
-#endif
-}
-
-/**
- * A wrapper for memory barrier implementation
- */
-void memory_barrier() {
-#ifdef __USE_GNU_CAS
-#elif __USE_PIN_CAS
 #endif
 }
 
