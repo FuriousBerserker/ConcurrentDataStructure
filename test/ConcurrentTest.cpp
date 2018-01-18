@@ -3,7 +3,7 @@
 #include <cassert>
 #include "../inc/ConcurrentHashMap.hpp"
 
-const int NULL_VAL = -1;
+const int NULL_VAL = 0;
 ConcurrentHashMap<unsigned, unsigned, NULL_VAL, IdentityHash<unsigned> > ccMap1(10);
 //ConcurrentHashMap<int, int, NULL_VAL> ccMap2(10000);
 void* t1(void* params) {
@@ -15,6 +15,7 @@ void* t1(void* params) {
         ccMap1.put(base, base);
         base += delta;
    }
+   return NULL;
 }
 
 int main() {
