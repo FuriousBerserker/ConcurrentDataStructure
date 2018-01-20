@@ -70,6 +70,7 @@ class ConcurrentHashMap {
         Element* next;
         Element(const Key& key, const Value& value, Element* next)
             : key(key), value(value), next(next) {}
+        virtual ~Element() {}
     };
 
     uint64_t bucketNum;

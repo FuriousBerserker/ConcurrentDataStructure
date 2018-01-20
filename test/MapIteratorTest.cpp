@@ -2,7 +2,7 @@
 #define BOOST_TEST_DYN_LINK
 
 //Define our Module name (prints at testing)
-#define BOOST_TEST_MODULE "IteratorTest"
+#define BOOST_TEST_MODULE "MapIteratorTest"
 
 //VERY IMPORTANT - include this last
 #include <boost/test/unit_test.hpp>
@@ -14,9 +14,9 @@
 
 // ------------- Tests Follow --------------
 //Name your test cases for what they test
-BOOST_AUTO_TEST_CASE( assignment ) {
+BOOST_AUTO_TEST_CASE( iteratorOperations ) {
     const int NULL_VAL = -1;
-    ConcurrentHashMap<unsigned, int, NULL_VAL, IdentityHash<unsigned> > ccMap(10000);
+    ConcurrentHashMap<unsigned, int, NULL_VAL, IdentityHash<unsigned> > ccMap(10000), ccMap2(10000);
     std::vector<int> v;
     for (int i = 0; i < 10000; i++) {
         v.push_back(i + 10000);
@@ -39,5 +39,5 @@ BOOST_AUTO_TEST_CASE( assignment ) {
     BOOST_CHECK_EQUAL(ccMap.end() == ++it3, true);
     BOOST_CHECK_EQUAL(ccMap.end() == ++it4, true);
     BOOST_CHECK_EQUAL(ccMap.begin() != ccMap.end(), true);
-
+    BOOST_CHECK_EQUAL(ccMap2.begin() == ccMap2.end(), true);
 }

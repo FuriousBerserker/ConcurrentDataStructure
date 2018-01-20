@@ -2,7 +2,7 @@
 #define BOOST_TEST_DYN_LINK
 
 //Define our Module name (prints at testing)
-#define BOOST_TEST_MODULE "SequentialTest"
+#define BOOST_TEST_MODULE "MapSequentialTest"
 
 //VERY IMPORTANT - include this last
 #include <boost/test/unit_test.hpp>
@@ -12,7 +12,7 @@
 
 // ------------- Tests Follow --------------
 //Name your test cases for what they test
-BOOST_AUTO_TEST_CASE( assignment )
+BOOST_AUTO_TEST_CASE( sequentialPutAndGet )
 {
     const int NULL_VAL = -1;
     ConcurrentHashMap<unsigned, int, NULL_VAL, IdentityHash<unsigned> > ccMap(10000);
