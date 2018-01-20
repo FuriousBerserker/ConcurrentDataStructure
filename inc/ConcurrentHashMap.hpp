@@ -3,7 +3,9 @@
 
 #include <cinttypes>
 #include <cstddef>
-
+#include <cstdlib>
+#include <iostream>
+#include <utility>
 #ifdef __USE_GNU_CAS
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -140,6 +142,84 @@ class ConcurrentHashMap {
     //}
 
     uint64_t getSize() { return size; }
+
+   public:
+    /**
+     * A not-thread-safe iterator, it is the programmer's responsibility to
+     * synchronize the operations to the iterator with other operations
+     */
+    class iterator {
+       private:
+        ConcurrentHashMap* map;
+        uint64_t pos;
+        Element* nextVal;
+
+       private:
+        void findNextElement() {
+            while (pos < map->bucketNum && map->buckets[pos] == nullptr) {
+                pos++;
+            }
+            if (pos < map->bucketNum) {
+                nextVal = map->buckets[pos];
+                pos++;
+            } else {
+                nextVal = nullptr;
+            }
+        }
+
+       public:
+        iterator(ConcurrentHashMap* map, bool isEnd = false)
+            : map(map), pos(0), nextVal(nullptr) {
+            if (isEnd) {
+                pos = map->bucketNum;
+            } else {
+                findNextElement();
+            }
+        }
+
+        virtual ~iterator() {}
+
+        iterator& operator=(const iterator& other) {
+            this->map = other.map;
+            this->pos = other.pos;
+            this->nextVal = other.nextVal;
+            return *this;
+        }
+
+        iterator& operator++() {
+            if (nextVal) {
+                if (nextVal->next) {
+                    nextVal = nextVal->next;
+                } else {
+                    findNextElement();
+                }
+            }
+            return *this;
+        }
+
+        std::pair<Key, Value> operator*() {
+            if (nextVal) {
+                return std::make_pair(nextVal->key, nextVal->value);
+            } else {
+                std::cerr << "the iterator already reaches the end of the map"
+                          << std::endl;
+                abort();
+            }
+        }
+
+        friend bool operator==(const iterator& l, const iterator& r) {
+            return l.map == r.map && l.pos == r.pos;
+        }
+
+        friend bool operator!=(const iterator& l, const iterator& r) {
+            return !(l == r);
+        }
+    };
+
+   public:
+    iterator begin() { return iterator(this); }
+
+    iterator end() { return iterator(this, true); }
 };
 
 #endif
