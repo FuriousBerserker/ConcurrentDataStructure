@@ -1,9 +1,19 @@
 cmake_minimum_required(VERSION 2.8.7)
+
+macro(use_cxx11)
+  if (CMAKE_VERSION VERSION_LESS "3.1")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  else ()
+    set (CMAKE_CXX_STANDARD 11)
+  endif ()
+endmacro(use_cxx11)
+
 project(ConcurrentDataStructure)
 enable_testing()
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 include_directories (${Boost_INCLUDE_DIRS})
 find_package(Threads REQUIRED)
+use_cxx11()
 file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} test/*.cpp)
 foreach(TEST_SRC ${TEST_SRCS})
         #Extract the filename without an extension (NAME_WE)
@@ -31,3 +41,5 @@ add_custom_target(unittests ${CMAKE_COMMAND} -E env CTEST_OUTPUT_ON_FAILURE=1
     ${CMAKE_CTEST_COMMAND}
     DEPENDS ${testNames}
     WORKING_DIRECTORY ${CMAKE_BINAEY_DIR})
+
+
