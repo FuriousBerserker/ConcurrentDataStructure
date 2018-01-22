@@ -31,4 +31,7 @@ BOOST_AUTO_TEST_CASE( iteratorOperations ) {
     BOOST_CHECK_EQUAL(ll.begin() != ll.end(), true);
     ConcurrentList<int> ll2;
     BOOST_CHECK_EQUAL(ll2.begin() == ll2.end(), true);
+    ll2.insert(2);
+    BOOST_CHECK_EQUAL(ll2.begin() != ll2.end(), true);
+    BOOST_CHECK_EQUAL((++ll2.begin()) == ll2.end(), true);
 }

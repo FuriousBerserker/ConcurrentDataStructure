@@ -4,7 +4,7 @@
 #include "../inc/ConcurrentHashMap.hpp"
 
 const int NULL_VAL = 0;
-ConcurrentHashMap<unsigned, unsigned, NULL_VAL, IdentityHash<unsigned> > ccMap1(10);
+ConcurrentHashMap<unsigned, unsigned, NULL_VAL, IdentityHash<unsigned> > ccMap1(10), ccMap2(10);
 //ConcurrentHashMap<int, int, NULL_VAL> ccMap2(10000);
 void* t1(void* params) {
     unsigned* data = (unsigned*)params;
@@ -38,6 +38,11 @@ int main() {
         unsigned key = (k_base + i * delta);
         assert(ccMap1.get(key) == key);
     }
+    assert(ccMap1.getSize() == thread_num * section);
+
+    ccMap2.put(9, 9);
+    assert(ccMap2.begin() != ccMap2.end());
+    assert(++ccMap2.begin() == ccMap2.end());
     return 0;
 }
 

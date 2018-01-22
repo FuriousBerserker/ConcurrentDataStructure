@@ -34,6 +34,30 @@ inline V compare_and_swap(V* location, V oldVal, V newVal) {
 #endif
 }
 
+template <typename V>
+inline V atomic_increment(V* location, V inc) {
+#ifdef __USE_GNU_CAS
+    return __sync_add_and_fetch(location, inc);
+#elif defined __USE_PIN_CAS
+    return ATOMIC::OPS::Increment(location, inc);
+#else
+    V value = *location;
+    *location += inc;
+    return value;
+#endif
+}
+
+template <typename V>
+inline V atomic_load(V* location) {
+#ifdef __USE_GNU_CAS
+    __sync_synchronize();
+    return *location;
+#elif defined __USE_PIN_CAS
+    return ATOMIC::OPS::Load(location, ATOMIC::BARRIER_LD_NEXT);
+#else
+    return *location;
+#endif
+}
 /**
  * DefaultHash use variable's address as its hash
  */
@@ -125,6 +149,7 @@ class ConcurrentHashMap {
                 compare_and_swap((uintptr_t*)&buckets[hash], (uintptr_t)oldHead,
                                  (uintptr_t)newHead) == (uintptr_t)oldHead;
         } while (!success);
+        atomic_increment(&size, (uint64_t)1);
     }
 
     ///**
@@ -142,7 +167,7 @@ class ConcurrentHashMap {
     //}
     //}
 
-    uint64_t getSize() { return size; }
+    uint64_t getSize() { return atomic_load(&size); }
 
    public:
     /**
@@ -209,7 +234,7 @@ class ConcurrentHashMap {
         }
 
         friend bool operator==(const iterator& l, const iterator& r) {
-            return l.map == r.map && l.pos == r.pos;
+            return l.map == r.map && l.pos == r.pos && l.nextVal == r.nextVal;
         }
 
         friend bool operator!=(const iterator& l, const iterator& r) {
